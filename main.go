@@ -177,14 +177,23 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	for _, group := range g.map1.ObjectGroups {
 		for _, object := range group.Objects {
+			tile, ok := g.map1.Tiles[object.GID]
+			// missing GID means there's no sprite, like for map bounds
+			if !ok {
+				continue
+			}
+
 			op := &ebiten.DrawImageOptions{}
+			if group.Opacity > 0 {
+				op.ColorM.Scale(1, 1, 1, group.Opacity)
+			}
+			op.GeoM.Translate(0, -float64(tile.Image.Height))
+			//op.GeoM.Translate(-float64(tile.Image.Width)/2, -float64(tile.Image.Height)/2)
+			op.GeoM.Rotate(object.Rotation*math.Pi/180)
+			op.GeoM.Scale(object.Width/float64(tile.Image.Width), object.Height/float64(tile.Image.Height))
 			op.GeoM.Translate(object.X, object.Y)
 
-			img, ok := g.map1.Tiles[object.GID]
-			// missing GID means there's no sprite, like for map bounds
-			if ok {
-				g.world.DrawImage(img, op)
-			}
+			g.world.DrawImage(tile.Image.Data, op)
 		}
 	}
 

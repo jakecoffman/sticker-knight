@@ -19,7 +19,7 @@ const (
 )
 
 type Map struct {
-	Tiles map[int]*ebiten.Image // lookup tile image by gid
+	Tiles map[int]*Tile // lookup tile image by gid
 
 	Width      int `xml:"width,attr"`
 	Height     int `xml:"height,attr"`
@@ -32,46 +32,51 @@ type Map struct {
 	} `xml:"tileset"`
 	Layer *struct {
 		Text   string `xml:",chardata"`
-		ID     int `xml:"id,attr"`
+		ID     int    `xml:"id,attr"`
 		Name   string `xml:"name,attr"`
-		Width  int `xml:"width,attr"`
-		Height int `xml:"height,attr"`
+		Width  int    `xml:"width,attr"`
+		Height int    `xml:"height,attr"`
 		Data   struct {
-			Text     string `xml:",chardata"`
+			Text string `xml:",chardata"`
 		} `xml:"data"`
 	} `xml:"layer"`
 	ObjectGroups []*ObjectGroup `xml:"objectgroup"`
 }
 
 type ObjectGroup struct {
-	Text    string `xml:",chardata"`
-	ID      string `xml:"id,attr"`
-	Name    string `xml:"name,attr"`
+	Text    string  `xml:",chardata"`
+	ID      string  `xml:"id,attr"`
+	Name    string  `xml:"name,attr"`
+	Opacity float64 `xml:"opacity,attr"`
 	Objects []*struct {
 		// Decoded from GID
 		FlippedHorizontally, FlippedVertically, FlippedDiagonally bool
 
-		Text   string `xml:",chardata"`
-		ID     int `xml:"id,attr"`
-		GID    int `xml:"gid,attr"`
-		X      float64 `xml:"x,attr"`
-		Y      float64 `xml:"y,attr"`
-		Width  float64 `xml:"width,attr"`
-		Height float64 `xml:"height,attr"`
+		Text     string  `xml:",chardata"`
+		ID       int     `xml:"id,attr"`
+		GID      int     `xml:"gid,attr"`
+		X        float64 `xml:"x,attr"`
+		Y        float64 `xml:"y,attr"`
+		Width    float64 `xml:"width,attr"`
+		Height   float64 `xml:"height,attr"`
+		Rotation float64 `xml:"rotation,attr"`
 	} `xml:"object"`
 }
 
 type TileSet struct {
-	Name  string `xml:"name,attr"`
-	Tiles []*struct {
-		ID int `xml:"id,attr"`
-		Image struct {
-			Source string `xml:"source,attr"`
-			Width int `xml:"width,attr"`
-			Height int `xml:"height,attr"`
-		} `xml:"image"`
-		ObjectGroup *ObjectGroup `xml:"objectgroup"`
-	} `xml:"tile"`
+	Name  string  `xml:"name,attr"`
+	Tiles []*Tile `xml:"tile"`
+}
+
+type Tile struct {
+	ID    int `xml:"id,attr"`
+	Image struct {
+		Data   *ebiten.Image
+		Source string `xml:"source,attr"`
+		Width  int    `xml:"width,attr"`
+		Height int    `xml:"height,attr"`
+	} `xml:"image"`
+	ObjectGroup *ObjectGroup `xml:"objectgroup"`
 }
 
 func NewMap(name string) *Map {
@@ -101,7 +106,7 @@ func NewMap(name string) *Map {
 		}
 	}
 
-	lookup := make(map[int]*ebiten.Image)
+	lookup := make(map[int]*Tile)
 
 	for _, entry := range map1.TileSets {
 		f, err = os.Open(assetDir + entry.Source)
@@ -125,8 +130,8 @@ func NewMap(name string) *Map {
 			if err = f.Close(); err != nil {
 				panic(err)
 			}
-			tilesImage := ebiten.NewImageFromImage(img)
-			lookup[entry.Firstgid+tile.ID] = tilesImage
+			tile.Image.Data = ebiten.NewImageFromImage(img)
+			lookup[entry.Firstgid+tile.ID] = tile
 		}
 	}
 
