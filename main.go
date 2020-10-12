@@ -49,7 +49,7 @@ type Game struct {
 	map1 *tiled.Map
 
 	camera *camera.Camera
-	world *ebiten.Image
+	world  *ebiten.Image
 
 	drawPhysics bool
 
@@ -65,8 +65,8 @@ func NewGame() *Game {
 	game := &Game{
 		camera: &camera.Camera{
 			ViewPort:   f64.Vec2{screenWidth, screenHeight},
-			Position:   f64.Vec2{861, 766},
-			ZoomFactor: -106,
+			Position:   f64.Vec2{380, 550},
+			ZoomFactor: -67,
 			Rotation:   0,
 		},
 	}
@@ -189,7 +189,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 			op.GeoM.Translate(0, -float64(tile.Image.Height))
 			//op.GeoM.Translate(-float64(tile.Image.Width)/2, -float64(tile.Image.Height)/2)
-			op.GeoM.Rotate(object.Rotation*math.Pi/180)
+			op.GeoM.Rotate(object.Rotation * math.Pi / 180)
 			op.GeoM.Scale(object.Width/float64(tile.Image.Width), object.Height/float64(tile.Image.Height))
 			op.GeoM.Translate(object.X, object.Y)
 
