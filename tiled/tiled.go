@@ -125,13 +125,14 @@ func NewMap(name string) *Map {
 			object.FlippedDiagonally = (object.GID & flippedDiagonallyFlag) != 0
 
 			// clear the flags so the GID exists in the tile lookup
-			object.GID = object.GID & ^flippedHorizontallyFlag
-			object.GID = object.GID & ^flippedVerticallyFlag
-			object.GID = object.GID & ^flippedDiagonallyFlag
+			object.GID &= ^(flippedHorizontallyFlag | flippedVerticallyFlag | flippedDiagonallyFlag)
 
 			if object.Template != "" {
 				// parse the template file
 				f, err := os.Open(assetDir + object.Template)
+				if err != nil {
+					panic("Failed opening template: " + assetDir + object.Template + " - " + err.Error())
+				}
 				var template Template
 				if err = xml.NewDecoder(f).Decode(&template); err != nil {
 					panic(err)
